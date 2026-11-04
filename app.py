@@ -3,7 +3,6 @@ from openai import OpenAI
 
 st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות - Groq AI", page_icon="⚡", layout="centered")
 
-# שליפת מפתח ה-API של Groq מתוך ה-Secrets של Streamlit
 groq_api_key = st.secrets.get("GROQ_API_KEY", "")
 
 if 'page' not in st.session_state:
@@ -31,7 +30,6 @@ if st.session_state['page'] == 'create':
         else:
             with st.spinner("Groq מייצר עבורך קוד יצירתי במהירות הבזק... 🚀"):
                 try:
-                    # חיבור ל-Groq תוך שימוש במבנה של OpenAI
                     client = OpenAI(
                         base_url="https://api.groq.com/openai/v1",
                         api_key=groq_api_key
@@ -53,8 +51,8 @@ if st.session_state['page'] == 'create':
                     """
 
                     response = client.chat.completions.create(
-                        model="llama-3.1-8b-instant",  # מודל מהיר ויציב במיוחד של Groq
-                        messages=[{"role": "user", content: prompt}],
+                        model="llama-3.1-8b-instant",
+                        messages=[{"role": "user", "content": prompt}],  # תיקון המרכאות כאן
                         temperature=0.85
                     )
                     
