@@ -50,13 +50,13 @@ if st.session_state['page'] == 'create':
     }
 
     st.subheader("👀 תצוגה מקדימה של הברכה הבודדת:")
-    preview_box = f"""┌────────────────────────────────────────────────────────┐
-│ // {grade_input} | {topic} | {event}{category_label}
+    preview_box = f"""
+ // {grade_input} | {topic} | {event}{category_label}
 {code_body}
-│
-│ // בהצלחה! מאמינה בכם ❤️
-│ // {teacher_name}
-└────────────────────────────────────────────────────────┘"""
+
+ // בהצלחה! מאמינה בכם ❤️
+ // {teacher_name}
+"""
     st.code(preview_box, language="text")
 
     if st.button("🖨️ מעבר לדף ההדפסה והגזירה (4 כרטיסיות בדף)"):
