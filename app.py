@@ -1,19 +1,23 @@
 import streamlit as st
+import google.generativeai as genai
 
-st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות", page_icon="✂️", layout="centered")
+st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות מבוסס Gemini", page_icon="🤖", layout="centered")
 
-# ניהול מצב (Session State) כדי לעבור בין מסך היצירה למסך ההדפסה
+# הגדרת מפתח ה-API של Gemini מתוך ה-Secrets
+gemini_api_key = st.secrets.get("GEMINI_API_KEY", "")
+
+if gemini_api_key:
+    genai.configure(api_key=gemini_api_key)
+
 if 'page' not in st.session_state:
     st.session_state['page'] = 'create'
 
-# --- מסך 1: יצירה ועריכה ---
 if st.session_state['page'] == 'create':
-    st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#)")
-    st.write("צרי כרטיסייה אישית, בחני אותה, וכשתהיי מוכנה עברי לעמוד ההדפסה והגזירה!")
+    st.title("🤖 מחולל ברכות תכנותיות מבוסס Gemini (C#)")
+    st.write("צרי ברכה יצירתית, שנונה ומקורית בעזרת הבינה המלאכותית של גוגל!")
 
-    # שדות קלט חופשיים לגמרי
     teacher_name = st.text_input("שם המורה:", value="ויקה")
-    grade_input = st.text_input("שם כיתה / שכבה חופשי:", value="כיתה י'")
+    grade_input = st.text_input("שם כיתה / שכבה חופשי:", value="כיתה י' האלופה")
     programming_language = "C#"
     
     topic = st.selectbox(
@@ -24,48 +28,55 @@ if st.session_state['page'] == 'create':
     event = st.selectbox("אירוע:", ["מבחן", "בגרות", "חג פסח", "חנוכה", "סיום שנה"])
     custom_category = st.text_input("התאמה אישית לקטגוריה / הערה נוספת (אופציונלי):", value="")
 
-    # בניית גוף הקוד בהתאם לנושא
-    if "תנאים" in topic:
-        code_body = "if (learned && practiced)\n{\n    Console.WriteLine(\"ההצלחה בדרך!\");\n}\nelse\n{\n    Console.WriteLine(\"תמשיך לנסות!\");\n}"
-    elif "לולאות" in topic:
-        code_body = "for (int i = 0; i < exam.Questions; i++)\n{\n    Console.WriteLine(\"פותר עוד שאלה בביטחון!\");\n}"
-    elif "קינון" in topic:
-        code_body = "for (int r = 0; r < rows; r++)\n{\n    for (int c = 0; c < cols; c++)\n        Console.Write(\"⭐ \");\n    Console.WriteLine();\n}"
-    elif "רקורסיה" in topic:
-        code_body = "public static void Solve(int level)\n{\n    if (level == 0) return; // תנאי עצירה\n    Solve(level - 1);\n}"
-    else:  # שרשרת חוליות
-        code_body = "Node current = head;\nwhile (current != null)\n{\n    current = current.next;\n}"
+    if st.button("✨ ג'נרט ברכה יצירתית עם Gemini"):
+        if not gemini_api_key:
+            st.error("נא להגדיר את מפתח ה-GEMINI_API_KEY בהגדרות ה-Secrets של Streamlit.")
+        else:
+            with st.spinner("Gemini חושב על קוד יצירתי במיוחד בשבילך... 🚀"):
+                try:
+                    # שימוש במודל Gemini המהיר והחכם
+                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    
+                    prompt = f"""
+                    כתוב קוד ברכה קצר, חכם ומצחיק לתלמידים בתחביר של שפת C#.
+                    פרטים:
+                    - עבור: {grade_input}
+                    - נושא בתכנות: {topic}
+                    - אירוע: {event}
+                    - הערה נוספת: {custom_category}
+                    - שם המורה: {teacher_name}
+                    
+                    הנחיות:
+                    1. השתמש בתחביר נקי של C# (לדוגמה Console.WriteLine, מבני בקרה וכו').
+                    2. שלב הומור גיקי שקשור לנושא.
+                    3. אל תוסיף הסברים מסביב, רק את קוד ה-C# עצמו שמתחיל בהערה עם פרטי הברכה ומסתיים בחתימת המורה.
+                    """
 
-    category_label = f" | {custom_category}" if custom_category else ""
-    
-    # שמירת הנתונים ב-Session State כדי שיועברו למסך הבא
-    st.session_state['card_data'] = {
-        'teacher': teacher_name,
-        'grade': grade_input,
-        'topic': topic,
-        'event': event,
-        'category': category_label,
-        'code': code_body,
-        'lang': programming_language
-    }
+                    response = model.generate_content(prompt)
+                    ai_code = response.text.strip()
+                    ai_code = ai_code.replace("```csharp", "").replace("```", "").strip()
+                    
+                    st.session_state['card_data'] = {
+                        'teacher': teacher_name,
+                        'grade': grade_input,
+                        'topic': topic,
+                        'event': event,
+                        'code': ai_code,
+                        'lang': programming_language
+                    }
+                    st.success("הברכה נוצרה בהצלחה על ידי Gemini! 🎉")
+                except Exception as e:
+                    st.error(f"שגיאה בהתחברות ל-Gemini API: {e}")
 
-    st.subheader("👀 תצוגה מקדימה של הברכה הבודדת:")
-    preview_box = f"""
- // {grade_input} | {topic} | {event}{category_label}
-{code_body}
+    if 'card_data' in st.session_state:
+        st.subheader("👀 תצוגה מקדימה של הברכה:")
+        st.code(st.session_state['card_data']['code'], language="csharp")
 
- // בהצלחה! מאמינה בכם ❤️
- // {teacher_name}
-"""
-    st.code(preview_box, language="text")
+        if st.button("🖨️ מעבר לדף ההדפסה והגזירה (4 כרטיסיות בדף)"):
+            st.session_state['page'] = 'print'
+            st.rerun()
 
-    if st.button("🖨️ מעבר לדף ההדפסה והגזירה (4 כרטיסיות בדף)"):
-        st.session_state['page'] = 'print'
-        st.rerun()
-
-# --- מסך 2: דף ההדפסה והגזירה הנקי ---
 elif st.session_state['page'] == 'print':
-    # עיצוב CSS מיוחד שמסתיר את התפריטים של האתר בזמן הדפסה
     st.markdown("""
         <style>
         .card-box {
@@ -73,7 +84,7 @@ elif st.session_state['page'] == 'print':
             border: 2px dashed #000000;
             border-radius: 8px;
             padding: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             font-family: 'Courier New', Courier, monospace;
             direction: ltr;
             text-align: left;
@@ -98,13 +109,13 @@ elif st.session_state['page'] == 'print':
             }
             .card-box {
                 border: 1.5px dashed #000000 !important;
-                padding: 8px !important;
-                margin-bottom: 10px !important;
-                font-size: 0.85rem !important;
+                padding: 6px !important;
+                margin-bottom: 8px !important;
+                font-size: 0.8rem !important;
             }
             pre {
-                font-size: 0.85rem !important;
-                line-height: 1.2 !important;
+                font-size: 0.8rem !important;
+                line-height: 1.15 !important;
             }
         }
         </style>
@@ -115,22 +126,15 @@ elif st.session_state['page'] == 'print':
         st.rerun()
 
     st.title("🖨️ עמוד הדפסה וגזירה")
-    st.info("💡 זהו עמוד ההדפסה הנקי. לחצי על Ctrl+P (או Cmd+P) במקלדת כדי לשמור כ-PDF או להדפיס את הכרטיסיות ישירות!")
+    st.info("💡 לחצי על Ctrl+P (או Cmd+P) במקלדת כדי לשמור כ-PDF או להדפיס את 4 הכרטיסיות נקיות בשחור-לבן!")
 
     data = st.session_state['card_data']
-    
-    full_card_content = f"""// {data['grade']} | {data['topic']} | {data['event']}{data['category']}
-{data['code']}
 
-// בהצלחה! מאמינה בכם ❤️
-// {data['teacher']}"""
-
-    # הצגת 4 כרטיסיות זהות מוכנות לגזירה בשחור-לבן
     for i in range(1, 5):
         card_html = f"""
         <div class="card-box">
             <div class="card-header">✂️ כרטיסייה #{i} | {data['grade']} ({data['lang']})</div>
-            <pre style="margin:0; color: #000000; background: transparent; font-weight: bold; font-size: 0.95rem;">{full_card_content}</pre>
+            <pre style="margin:0; color: #000000; background: transparent; font-weight: bold;">{data['code']}</pre>
         </div>
         """
         st.markdown(card_html, unsafe_allow_html=True)
