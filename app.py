@@ -66,14 +66,14 @@ if st.session_state['page'] == 'create':
 # --- מסך 2: דף ההדפסה והגזירה הנקי ---
 elif st.session_state['page'] == 'print':
     # עיצוב CSS מיוחד שמסתיר את התפריטים של האתר בזמן הדפסה
-    st.markdown("""
+st.markdown("""
         <style>
         .card-box {
             background-color: #ffffff;
             border: 2px dashed #000000;
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 25px;
+            padding: 10px;
+            margin-bottom: 15px;
             font-family: 'Courier New', Courier, monospace;
             direction: ltr;
             text-align: left;
@@ -82,15 +82,37 @@ elif st.session_state['page'] == 'print':
         }
         .card-header {
             color: #555555;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
             border-bottom: 1px solid #cccccc;
-            padding-bottom: 4px;
+            padding-bottom: 3px;
             font-family: Arial, sans-serif;
         }
+        
+        /* הגדרות מיוחדות ומדויקות להדפסה בלבד */
         @media print {
-            .stButton, header, footer, .sidebar {
+            /* הסתרת כל מה שלא קשור לכרטיסיות */
+            .stButton, header, footer, .sidebar, title, .stInfo {
                 display: none !important;
+            }
+            
+            /* העלאת הדף למעלה וביטול שוליים מיותרים של הדפדפן */
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* התאמת גודל הכרטיסיות כדי שיתיישבו מושלם בעמוד הדפסה אחד או שניים בלי לחרוג */
+            .card-box {
+                border: 1.5px dashed #000000 !important;
+                padding: 8px !important;
+                margin-bottom: 10px !important;
+                font-size: 0.85rem !important;
+            }
+            
+            pre {
+                font-size: 0.85rem !important;
+                line-height: 1.2 !important;
             }
         }
         </style>
