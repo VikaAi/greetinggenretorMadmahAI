@@ -5,13 +5,12 @@ st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותי
 # עיצוב CSS מותאם אישית: שחור-לבן נקי, כרטיסיות מנוקדות לגזירה, והסתרת תפריטים בהדפסה ל-PDF
 st.markdown("""
     <style>
-    /* עיצוב כללי למסך */
     body {
         background-color: #f8f9fa;
         color: #212529;
     }
     
-    /* סגנון כרטיסייה נפרדת לגזירה (שחור לבן נקי) */
+    /* סגנון כרטיסייה נפרדת לגזירה (שחור לבן נקי עם מסגרת מנוקדת) */
     .card-box {
         background-color: #ffffff;
         border: 2px dashed #000000;
@@ -34,7 +33,7 @@ st.markdown("""
         font-family: Arial, sans-serif;
     }
 
-    /* הגדרות מיוחדות להדפסה ל-PDF: מציג אך ורק את הכרטיסיות בלי תפריטים ובאקראיות מיותרת */
+    /* הגדרות להדפסת PDF: מסתיר את כל תפריטי המערכת ומציג רק את הכרטיסיות */
     @media print {
         body * {
             visibility: hidden;
@@ -59,26 +58,22 @@ st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#)")
 st.write("מלאי את הפרמטרים, צרי כרטיסיות בשחור-לבן ושמרי מיד כקובץ PDF נקי לגזירה!")
 
 # שדות קלט למורה
-teacher_name = st.text_input("שם המורה:", value="נטע")
-grade = st.selectbox("כיתה / שכבה:", ["כיתה י'", "כיתה י'א", "כיתה י'ב", "מגמת סייבר"])
+teacher_name = st.text_input("שם המורה:", value="ויקה")
+grade = st.selectbox("כיתה / שכבה:", ["כיתה י'", "כיתה י'א", "כיתה י'ב"])
 
-# שפת תכנות קבועה ל-C# בהתאם לבקשה
 programming_language = "C#"
 
-# נושאים מבוקשים
 topic = st.selectbox(
     "נושא תכנותי:", 
     ["תנאים (if/else)", "לולאות (Loops)", "קינון (Nested Loops)", "רקורסיה (Recursion)", "שרשרת חוליות (Linked List)"]
 )
 
-event = st.selectbox("אירוע:", ["מבחן / בגרות", "חג פסח", "חנוכה", "סיום שנה"])
-
-# אפשרות להתאמה אישית / שינוי קטגוריה חופשית
+event = st.selectbox("אירוע:", ["מבחן","בגרות", "חג פסח", "חנוכה", "סיום שנה"])
 custom_category = st.text_input("התאמה אישית לקטגוריה / הערה בכרטיסייה (אופציונלי):", value="")
 
 if st.button("✨ יצר כרטיסיות לגזירה"):
     
-    # בניית קוד הברכה בהתאם לנושא ולאירוע ב-C#
+    # בניית גוף הקוד בהתאם לנושא הנבחר ב-C#
     if "תנאים" in topic:
         code_body = f"""if (learned && practiced) 
 {{
@@ -106,14 +101,13 @@ else
     if (level == 0) return; // תנאי עצירה
     Solve(level - 1);
 }}"""
-    else: // שרשרת חוליות
+    else:  # שרשרת חוליות (תוקן תקינות ההערה)
         code_body = f"""Node current = head;
 while (current != null)
 {{
     current = current.next;
 }}"""
 
-    # הרכבת תוכן הכרטיסייה הסופי
     category_label = f" | {custom_category}" if custom_category else ""
     full_card_content = f"""// {grade} | {topic} | {event}{category_label}
 {code_body}
@@ -123,7 +117,7 @@ while (current != null)
 
     st.success("הכרטיסיות נוצרו בהצלחה!")
     
-    # אזור ייעודי להדפסה בלבד (יוצג ב-PDF נקי בלי פילטרים)
+    # אזור ייעודי להדפסה שיוצג ב-PDF נקי בלי הפילטרים והכפתורים של האתר
     st.markdown('<div id="printable-cards">', unsafe_allow_html=True)
     st.subheader("📋 כרטיסיות מוכנות להדפסה וגזירה (תצוגה מקדימה):")
     
