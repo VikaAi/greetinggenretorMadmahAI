@@ -36,24 +36,23 @@ if st.session_state['page'] == 'create':
                     )
                     
                     prompt = f"""
-                    כתוב קוד ברכה קצר, חכם ומצחיק לתלמידים בתחביר של שפת C#.
+                    כתוב קוד C# קצרצר, מדויק ומינימליסטי (עד 6-8 שורות בלבד) שמדגים אך ורק את הנושא: {topic}.
                     פרטים:
                     - עבור: {grade_input}
-                    - נושא בתכנות: {topic}
                     - אירוע: {event}
                     - הערה נוספת: {custom_category}
                     - שם המורה: {teacher_name}
                     
-                    הנחיות:
-                    1. השתמש בתחביר נקי של C# (לדוגמה Console.WriteLine, מבני בקרה וכו').
-                    2. שלב הומור גיקי שקשור לנושא.
-                    3. אל תוסיף הסברים מסביב, רק את קוד ה-C# עצמו שמתחיל בהערה עם פרטי הברכה ומסתיים בחתימת המורה.
+                    הנחיות קשיחות:
+                    1. אל תמציא פונקציות עזר (כמו IsCodeReady או לולאות בדיקה ארוכות). כתוב אך ורק את קוד ה-C# הישיר שקשור ברובו המוחלט ל-{topic}.
+                    2. שלב הערה אחת קצרה ומצחיקה שקשורה לנושא ולאירוע.
+                    3. אל תוסיף שום הסברים מסביב, רק את קוד ה-C# נקי שמתחיל בתוך Main או כסקריפט קצר ומסתיים בחתימה של {teacher_name}.
                     """
 
                     response = client.chat.completions.create(
-                        model="openai/gpt-oss-120b",  # המודל המדויק שמופיע כרגע בפלייגראונד שלך ב-Groq
+                        model="openai/gpt-oss-120b",
                         messages=[{"role": "user", "content": prompt}],
-                        temperature=0.85
+                        temperature=0.7
                     )
                     
                     ai_code = response.choices[0].message.content.strip()
