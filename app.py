@@ -1,19 +1,19 @@
 import streamlit as st
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+import tempfile
+import os
 
 st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות", page_icon="✂️", layout="centered")
 
-st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#)")
-st.write("מלאי את הפרמטרים בחופשיות, צרי כרטיסיות בשחור-לבן והורידי קובץ מוכן לגזירה בלחיצת כפתור!")
+st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#) ל-PDF")
+st.write("מלאי את הפרמטרים, צרי כרטיסיות שחור-לבן והורידי קובץ PDF מוכן לגזירה בלחיצת כפתור!")
 
-# שדות קלט גמישים לחלוטין (בחירה או הקלדה חופשית)
+# שדות קלט גמישים לחלוטין (הקלדה חופשית מלאה)
 teacher_name = st.text_input("שם המורה:", value="ויקה")
 
-grade_options = ["כיתה י'", "כיתה י'א", "כיתה י'ב", "מגמת סייבר", "הקלד כיתה אחרת..."]
-grade_selection = st.selectbox("בחר כיתה / שכבה:", grade_options)
-if grade_selection == "הקלד כיתה אחרת...":
-    grade = st.text_input("הקלד שם כיתה מותאם אישית:", value="כיתה ט'")
-else:
-    grade = grade_selection
+# שדה כיתה המאפשר בחירה או הקלדה חופשית לגמרי
+grade_input = st.text_input("הקלד שם כיתה / שכבה (למשל: י' 3, מגמת סייבר):", value="כיתה י'")
 
 programming_language = "C#"
 
@@ -23,9 +23,9 @@ topic = st.selectbox(
 )
 
 event = st.selectbox("אירוע:", ["מבחן", "בגרות", "חג פסח", "חנוכה", "סיום שנה"])
-custom_category = st.text_input("התאמה אישית לקטגוריה / הערה בכרטיסייה (אופציונלי):", value="")
+custom_category = st.text_input("התאמה אישית לקטגוריה / הערה נוספת (אופציונלי):", value="")
 
-if st.button("✨ צור כרטיסיות לגזירה"):
+if st.button("✨ צור קובץ PDF לגזירה"):
     
     # בניית גוף הקוד בהתאם לנושא הנבחר ב-C#
     if "תנאים" in topic:
@@ -40,28 +40,68 @@ if st.button("✨ צור כרטיסיות לגזירה"):
         code_body = "Node current = head;\nwhile (current != null)\n{\n    current = current.next;\n}"
 
     category_label = f" | {custom_category}" if custom_category else ""
+    card_title = f"// {grade_input} | {topic} | {event}{category_label}"
+    card_footer1 = "// בהצלחה! מאמינה בכם ❤️"
+    card_footer2 = f"// {teacher_name}"
+
+    # יצירת קובץ PDF אמיתי באמצעות ReportLab
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    pdf_path = tmp_file.name
+    tmp_file.close()
+
+    c = canvas.Canvas(pdf_path, pagesize=A4)
+    width, height = A4  # מידות דף A4 בנקודות
+
+    # הגדרת מידות לכרטיסיות (4 כרטיסיות בעמוד, מסגרת שחור-לבן מקווקושת/נקייה)
+    box_width = 500
+    box_height = 140
+    margin_x = (width - box_width) / 2
+    start_y = height - 160
+    spacing = 20
+
+    for i in range(1, 5):
+        current_y = start_y - (i - 1) * (box_height + spacing)
+        
+        # ציור מסגרת מלבנית בשחור-לבן לכל כרטיסייה
+        c.setLineWidth(1)
+        c.setDash(4, 4)  # קו מקווקו לגזירה
+        c.rect(margin_x, current_y, box_width, box_height)
+        c.setDash()      # איפוס הקו למלא עבור הטקסט
+        
+        # כתיבת תוכן הקוד בתוך הכרטיסייה (פונט מונוספייס)
+        c.setFont("Courier", 10)
+        text_x = margin_x + 15
+        text_y = current_y + box_height - 25
+        
+        # שורות ההדפסה בתוך הכרטיסייה
+        lines = [
+            f"✂️ כרטיסייה #{i} | {card_title}",
+            "--------------------------------------------------",
+            *code_body.split('\n'),
+            "",
+            card_footer1,
+            card_footer2
+        ]
+        
+        for line in lines:
+            c.drawString(text_x, text_y, line)
+            text_y -= 13  # מרווח שורות
+
+    c.save()
+
+    # קריאת קובץ ה-PDF שנוצר לצורך כפתור ההורדה
+    with open(pdf_path, "rb") as f:
+        pdf_bytes = f.read()
+
+    st.success("קובץ ה-PDF נוצר בהצלחה!")
     
-    # יצירת מבנה כרטיסייה נקי לגזירה בשחור-לבן
-    single_card = f"""┌────────────────────────────────────────────────────────┐
-│ // {grade} | {topic} | {event}{category_label}
-{code_body}
-│
-│ // בהצלחה! מאמינה בכם ❤️
-│ // {teacher_name}
-└────────────────────────────────────────────────────────┘"""
-
-    # יצירת דף שלם המכיל מספר כרטיסיות להדפסה
-    full_page_content = "\n\n".join([f"--- כרטיסייה #{i} ---\n" + single_card for i in range(1, 5)])
-
-    st.success("הכרטיסיות נוצרו בהצלחה!")
-    
-    st.subheader("📋 תצוגה מקדימה של הכרטיסיות:")
-    st.code(full_page_content, language="text")
-
-    # כפתור הורדה ישיר ואמיתי של קובץ טקסט מעוצב מוכן להדפסה
+    # כפתור הורדה אמיתי ל-PDF
     st.download_button(
-        label="📥 לחץ כאן להורדת קובץ הכרטיסיות לגזירה",
-        data=full_page_content,
-        file_name="tech_greetings_cards.txt",
-        mime="text/plain"
+        label="📥 לחץ כאן להורדת קובץ ה-PDF לגזירה",
+        data=pdf_bytes,
+        file_name="tech_greetings_cards.pdf",
+        mime="application/pdf"
     )
+
+    if os.path.exists(pdf_path):
+        os.unlink(pdf_path)
