@@ -1,7 +1,7 @@
 import streamlit as st
 from openai import OpenAI
 
-st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות - Groq AI", page_icon="⚡", layout="centered")
+st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות - AI", page_icon="⚡", layout="centered")
 
 groq_api_key = st.secrets.get("GROQ_API_KEY", "")
 
@@ -18,17 +18,17 @@ if st.session_state['page'] == 'create':
     
     topic = st.selectbox(
         "נושא תכנותי:", 
-        ["תנאים (if/else)", "לולאות (Loops)", "קינון (Nested Loops)", "רקורסיה (Recursion)", "שרשרת חוליות (Linked List)"]
+        ["תנאים (if/else)", "לולאות (Loops)", "קינון (Nested Loops)", "רקורסיה (Recursion)", "אחר"]
     )
     
     event = st.selectbox("אירוע:", ["מבחן", "בגרות", "חג פסח", "חנוכה", "סיום שנה"])
     custom_category = st.text_input("התאמה אישית לקטגוריה / הערה נוספת (אופציונלי):", value="")
 
-    if st.button("✨ ג'נרט ברכה יצירתית עם Groq"):
+    if st.button("✨ ג'נרט ברכה יצירתית  "):
         if not groq_api_key:
             st.error("נא להגדיר את מפתח ה-GROQ_API_KEY בהגדרות ה-Secrets של Streamlit.")
         else:
-            with st.spinner("Groq מייצר עבורך קוד יצירתי במהירות הבזק... 🚀"):
+            with st.spinner(" מייצר עבורך משהו יצירתי במהירות הבזק... 🚀"):
                 try:
                     client = OpenAI(
                         base_url="https://api.groq.com/openai/v1",
@@ -36,23 +36,25 @@ if st.session_state['page'] == 'create':
                     )
                     
                     prompt = f"""
-                    כתוב קוד C# קצרצר, מדויק ומינימליסטי (עד 6-8 שורות בלבד) שמדגים אך ורק את הנושא: {topic}.
-                    פרטים:
+                    כתוב קוד C# קצרצר ומושלם ככרטיסיית ברכה לתלמידים.
+                    הנושא שחובה להציג באופן המרכזי ביותר הוא: {topic}.
+                    פרטים נוספים:
                     - עבור: {grade_input}
                     - אירוע: {event}
                     - הערה נוספת: {custom_category}
                     - שם המורה: {teacher_name}
                     
                     הנחיות קשיחות:
-                    1. אל תמציא פונקציות עזר (כמו IsCodeReady או לולאות בדיקה ארוכות). כתוב אך ורק את קוד ה-C# הישיר שקשור ברובו המוחלט ל-{topic}.
-                    2. שלב הערה אחת קצרה ומצחיקה שקשורה לנושא ולאירוע.
-                    3. אל תוסיף שום הסברים מסביב, רק את קוד ה-C# נקי שמתחיל בתוך Main או כסקריפט קצר ומסתיים בחתימה של {teacher_name}.
+                    1. הקוד חייב להיות מינימליסטי (4-6 שורות בלבד) ולהדגים ישירות את {topic} בצורה פשוטה שמובנת לתלמידים.
+                    2. שלב בתוך הקוד (כהערה או כטקסט פנימי) פאנץ' שנון או בדיחה קטנה שקשורה ל-{event} ול-{topic}.
+                    3. אל תמציא לולאות ארוכות או לוגיקה מסובכת שלא קשורה.
+                    4. פלט אך ורק את קוד ה-C# הנקי, בלי שום מילות הסבר מסביב, ומדגם כך שיסתיים בחתימה של {teacher_name}.
                     """
 
                     response = client.chat.completions.create(
                         model="openai/gpt-oss-120b",
                         messages=[{"role": "user", "content": prompt}],
-                        temperature=0.7
+                        temperature=0.6
                     )
                     
                     ai_code = response.choices[0].message.content.strip()
