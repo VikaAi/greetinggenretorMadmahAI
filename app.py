@@ -1,20 +1,16 @@
 import streamlit as st
-from fpdf import FPDF
-import tempfile
-import os
 
 st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות", page_icon="✂️", layout="centered")
 
-st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#) ל-PDF")
-st.write("מלאי את הפרמטרים (או השאירי חופשי), צרי כרטיסיות בשחור-לבן והורידי קובץ PDF מוכן לגזירה בלחיצת כפתור!")
+st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#)")
+st.write("מלאי את הפרמטרים בחופשיות, צרי כרטיסיות בשחור-לבן והורידי קובץ מוכן לגזירה בלחיצת כפתור!")
 
-# שדות קלט גמישים לחלוטין (גם בחירה וגם הקלדה חופשית)
+# שדות קלט גמישים לחלוטין (בחירה או הקלדה חופשית)
 teacher_name = st.text_input("שם המורה:", value="ויקה")
 
-# שדה כיתה מאפשר גם בחירה מהרשימה וגם הקלדה ידנית חופשית
-grade_options = ["כיתה י'", "כיתה י'א", "כיתה י'ב", "מגמת סייבר", "אחר..."]
-grade_selection = st.selectbox("בחר או הקלד כיתה / שכבה:", grade_options)
-if grade_selection == "אחר...":
+grade_options = ["כיתה י'", "כיתה י'א", "כיתה י'ב", "מגמת סייבר", "הקלד כיתה אחרת..."]
+grade_selection = st.selectbox("בחר כיתה / שכבה:", grade_options)
+if grade_selection == "הקלד כיתה אחרת...":
     grade = st.text_input("הקלד שם כיתה מותאם אישית:", value="כיתה ט'")
 else:
     grade = grade_selection
@@ -44,66 +40,28 @@ if st.button("✨ צור כרטיסיות לגזירה"):
         code_body = "Node current = head;\nwhile (current != null)\n{\n    current = current.next;\n}"
 
     category_label = f" | {custom_category}" if custom_category else ""
-    full_card_content = f"// {grade} | {topic} | {event}{category_label}\n{code_body}\n\n// בהצלחה! מאמינה בכם ❤️\n// {teacher_name}"
+    
+    # יצירת מבנה כרטיסייה נקי לגזירה בשחור-לבן
+    single_card = f"""┌────────────────────────────────────────────────────────┐
+│ // {grade} | {topic} | {event}{category_label}
+{code_body}
+│
+│ // בהצלחה! מאמינה בכם ❤️
+│ // {teacher_name}
+└────────────────────────────────────────────────────────┘"""
+
+    # יצירת דף שלם המכיל מספר כרטיסיות להדפסה
+    full_page_content = "\n\n".join([f"--- כרטיסייה #{i} ---\n" + single_card for i in range(1, 5)])
 
     st.success("הכרטיסיות נוצרו בהצלחה!")
     
-    # יצירת קובץ PDF אמיתי באמצעות FPDF עם מסגרות מקווקושות/נקיות לגזירה
-    pdf = FPDF(orientation='P', unit='mm', format='A4')
-    pdf.add_page()
-    
-    # הגדרת פונט בסיסי תואם אנגלית ותווים
-    pdf.set_font("Courier", size=10)
-    
-    # נחלק את העמוד לכרטיסיות (למשל 4 כרטיסיות בעמוד)
-    box_width = 180
-    box_height = 55
-    start_x = 15
-    start_y = 15
-    spacing = 8
-    
-    for i in range(1, 5):
-        current_y = start_y + (i - 1) * (box_height + spacing)
-        
-        # ציור מסגרת מלבנית לכרטיסייה (שחור-לבן נקי לגזירה)
-        pdf.set_draw_color(0, 0, 0)
-        pdf.set_line_width(0.5)
-        pdf.rect(start_x, current_y, box_width, box_height)
-        
-        # הוספת טקסט לתוך הכרטיסייה
-        pdf.set_xy(start_x + 4, current_y + 4)
-        header_text = f"✂️ Card #{i} | {grade} ({programming_language})"
-        pdf.set_font("Arial", 'B', 9)
-        pdf.cell(box_width - 8, 6, txt=header_text, ln=True)
-        
-        pdf.set_xy(start_x + 4, current_y + 12)
-        pdf.set_font("Courier", size=9)
-        
-        # פיצול השורות לצורך כתיבה מדויקת ב-PDF
-        for line in full_card_content.split('\n'):
-            pdf.set_x(start_x + 4)
-            pdf.cell(box_width - 8, 4.5, txt=line, ln=True)
+    st.subheader("📋 תצוגה מקדימה של הכרטיסיות:")
+    st.code(full_page_content, language="text")
 
-    # שמירת ה-PDF לקובץ זמני
-    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
-    pdf.output(tmp_file.name)
-    tmp_file.close()
-
-    # קריאת הקובץ להורדה ישירה דרך כפתור Streamlit אמיתי
-    with open(tmp_file.name, "rb") as pdf_file:
-        PDFbyte = pdf_file.read()
-
-    st.markdown("---")
-    st.subheader("📥 הורדת קובץ ה-PDF המוכן:")
-    
-    # כפתור הורדת PDF רשמי שעובד בלחיצה אחת בלי שום טריקים של הדפדפן
+    # כפתור הורדה ישיר ואמיתי של קובץ טקסט מעוצב מוכן להדפסה
     st.download_button(
-        label="📄 לחץ כאן להורדת כרטיסיות ה-PDF לגזירה",
-        data=PDFbyte,
-        file_name="tech_greetings_cards.pdf",
-        mime="application/octet-stream"
+        label="📥 לחץ כאן להורדת קובץ הכרטיסיות לגזירה",
+        data=full_page_content,
+        file_name="tech_greetings_cards.txt",
+        mime="text/plain"
     )
-    
-    # ניקוי קבצים זמניים
-    if os.path.exists(tmp_file.name):
-        os.unlink(tmp_file.name)
