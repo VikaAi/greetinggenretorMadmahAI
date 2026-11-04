@@ -49,7 +49,7 @@ if st.session_state['page'] == 'create':
                     2. שלב בתוך הקוד (כהערה או כטקסט פנימי) פאנץ' שנון או בדיחה קטנה שקשורה ל-{event} ול-{topic}.
                     3. אל תמציא לולאות ארוכות או לוגיקה מסובכת שלא קשורה.
                     4. פלט אך ורק את קוד ה-C# הנקי, בלי שום מילות הסבר מסביב, ומדגם כך שיסתיים בחתימה של {teacher_name}.
-                    5.השתמש בירידות שורה ובמבנה נקי ומסודר של קוד (עם בלוקים וסוגריים מסולסלים כמקובל ב-C#).
+                    5. השתמש בירידות שורה ובמבנה נקי ומסודר של קוד (עם בלוקים וסוגריים מסולסלים כמקובל ב-C#).
                     """
 
                     response = client.chat.completions.create(
@@ -74,8 +74,15 @@ if st.session_state['page'] == 'create':
                     st.error(f"שגיאה בהתחברות ל-Groq API: {e}")
 
     if 'card_data' in st.session_state:
-        st.subheader("👀 תצוגה מקדימה של הברכה:")
-        st.code(st.session_state['card_data']['code'], language="csharp")
+        st.subheader("👀 עריכה ותצוגה מקדימה של הברכה:")
+        st.info("💡 אפשר לערוך ולשנות את הקוד חופשי ישירות בתיבה למטה לפני ההדפסה!")
+        
+        edited_code = st.text_area(
+            "ערוך את קוד הברכה:",
+            value=st.session_state['card_data']['code'],
+            height=180
+        )
+        st.session_state['card_data']['code'] = edited_code
 
         if st.button("🖨️ מעבר לדף ההדפסה והגזירה (4 כרטיסיות בדף)"):
             st.session_state['page'] = 'print'
