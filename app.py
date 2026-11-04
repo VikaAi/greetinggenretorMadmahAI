@@ -51,7 +51,7 @@ if st.session_state['page'] == 'create':
                     """
 
                     response = client.chat.completions.create(
-                        model="llama-3.1-8b-instant",  # המודל המעודכן והנכון של Groq
+                        model="openai/gpt-oss-120b",  # המודל המדויק שמופיע כרגע בפלייגראונד שלך ב-Groq
                         messages=[{"role": "user", "content": prompt}],
                         temperature=0.85
                     )
