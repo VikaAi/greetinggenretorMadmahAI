@@ -34,8 +34,8 @@ if st.session_state['page'] == 'create':
         else:
             with st.spinner("Gemini חושב על קוד יצירתי במיוחד בשבילך... 🚀"):
                 try:
-                    # שימוש במודל Gemini המהיר והחכם
-                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    # עדכון שם המודל לגרסה יציבה
+                    model = genai.GenerativeModel('gemini-1.5-pro')
                     
                     prompt = f"""
                     כתוב קוד ברכה קצר, חכם ומצחיק לתלמידים בתחביר של שפת C#.
