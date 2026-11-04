@@ -1,65 +1,23 @@
 import streamlit as st
+from fpdf import FPDF
+import tempfile
+import os
 
 st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות", page_icon="✂️", layout="centered")
 
-# עיצוב CSS מותאם אישית: שחור-לבן נקי, כרטיסיות מנוקדות לגזירה, והסתרת תפריטים בהדפסה ל-PDF
-st.markdown("""
-    <style>
-    body {
-        background-color: #f8f9fa;
-        color: #212529;
-    }
-    
-    /* סגנון כרטיסייה נפרדת לגזירה (שחור לבן נקי עם מסגרת מנוקדת) */
-    .card-box {
-        background-color: #ffffff;
-        border: 2px dashed #000000;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-        font-family: 'Courier New', Courier, monospace;
-        direction: ltr;
-        text-align: left;
-        color: #000000;
-        page-break-inside: avoid;
-    }
-    
-    .card-header {
-        color: #555555;
-        font-size: 0.85rem;
-        margin-bottom: 8px;
-        border-bottom: 1px solid #cccccc;
-        padding-bottom: 4px;
-        font-family: Arial, sans-serif;
-    }
+st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#) ל-PDF")
+st.write("מלאי את הפרמטרים (או השאירי חופשי), צרי כרטיסיות בשחור-לבן והורידי קובץ PDF מוכן לגזירה בלחיצת כפתור!")
 
-    /* הגדרות להדפסת PDF: מסתיר את כל תפריטי המערכת ומציג רק את הכרטיסיות */
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-        #printable-cards, #printable-cards * {
-            visibility: visible;
-        }
-        #printable-cards {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-        }
-        .stButton, .stTextInput, .stSelectbox, header, footer {
-            display: none !important;
-        }
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#)")
-st.write("מלאי את הפרמטרים, צרי כרטיסיות בשחור-לבן ושמרי מיד כקובץ PDF נקי לגזירה!")
-
-# שדות קלט למורה
+# שדות קלט גמישים לחלוטין (גם בחירה וגם הקלדה חופשית)
 teacher_name = st.text_input("שם המורה:", value="ויקה")
-grade = st.selectbox("כיתה / שכבה:", ["כיתה י'", "כיתה י'א", "כיתה י'ב"])
+
+# שדה כיתה מאפשר גם בחירה מהרשימה וגם הקלדה ידנית חופשית
+grade_options = ["כיתה י'", "כיתה י'א", "כיתה י'ב", "מגמת סייבר", "אחר..."]
+grade_selection = st.selectbox("בחר או הקלד כיתה / שכבה:", grade_options)
+if grade_selection == "אחר...":
+    grade = st.text_input("הקלד שם כיתה מותאם אישית:", value="כיתה ט'")
+else:
+    grade = grade_selection
 
 programming_language = "C#"
 
@@ -68,70 +26,84 @@ topic = st.selectbox(
     ["תנאים (if/else)", "לולאות (Loops)", "קינון (Nested Loops)", "רקורסיה (Recursion)", "שרשרת חוליות (Linked List)"]
 )
 
-event = st.selectbox("אירוע:", ["מבחן","בגרות", "חג פסח", "חנוכה", "סיום שנה"])
+event = st.selectbox("אירוע:", ["מבחן", "בגרות", "חג פסח", "חנוכה", "סיום שנה"])
 custom_category = st.text_input("התאמה אישית לקטגוריה / הערה בכרטיסייה (אופציונלי):", value="")
 
-if st.button("✨ יצר כרטיסיות לגזירה"):
+if st.button("✨ צור כרטיסיות לגזירה"):
     
     # בניית גוף הקוד בהתאם לנושא הנבחר ב-C#
     if "תנאים" in topic:
-        code_body = f"""if (learned && practiced) 
-{{
-    Console.WriteLine("ההצלחה בדרך!");
-}}
-else 
-{{
-    Console.WriteLine("תמשיך לנסות!");
-}}"""
+        code_body = "if (learned && practiced)\n{\n    Console.WriteLine(\"ההצלחה בדרך!\");\n}\nelse\n{\n    Console.WriteLine(\"תמשיך לנסות!\");\n}"
     elif "לולאות" in topic:
-        code_body = f"""for (int i = 0; i < exam.Questions; i++)
-{{
-    Console.WriteLine("פותר עוד שאלה בביטחון!");
-}}"""
+        code_body = "for (int i = 0; i < exam.Questions; i++)\n{\n    Console.WriteLine(\"פותר עוד שאלה בביטחון!\");\n}"
     elif "קינון" in topic:
-        code_body = f"""for (int r = 0; r < rows; r++)
-{{
-    for (int c = 0; c < cols; c++)
-        Console.Write("⭐ ");
-    Console.WriteLine();
-}}"""
+        code_body = "for (int r = 0; r < rows; r++)\n{\n    for (int c = 0; c < cols; c++)\n        Console.Write(\"⭐ \");\n    Console.WriteLine();\n}"
     elif "רקורסיה" in topic:
-        code_body = f"""public static void Solve(int level)
-{{
-    if (level == 0) return; // תנאי עצירה
-    Solve(level - 1);
-}}"""
-    else:  # שרשרת חוליות (תוקן תקינות ההערה)
-        code_body = f"""Node current = head;
-while (current != null)
-{{
-    current = current.next;
-}}"""
+        code_body = "public static void Solve(int level)\n{\n    if (level == 0) return; // תנאי עצירה\n    Solve(level - 1);\n}"
+    else:  # שרשרת חוליות
+        code_body = "Node current = head;\nwhile (current != null)\n{\n    current = current.next;\n}"
 
     category_label = f" | {custom_category}" if custom_category else ""
-    full_card_content = f"""// {grade} | {topic} | {event}{category_label}
-{code_body}
-
-// בהצלחה! מאמינה בכם ❤️
-// {teacher_name}"""
+    full_card_content = f"// {grade} | {topic} | {event}{category_label}\n{code_body}\n\n// בהצלחה! מאמינה בכם ❤️\n// {teacher_name}"
 
     st.success("הכרטיסיות נוצרו בהצלחה!")
     
-    # אזור ייעודי להדפסה שיוצג ב-PDF נקי בלי הפילטרים והכפתורים של האתר
-    st.markdown('<div id="printable-cards">', unsafe_allow_html=True)
-    st.subheader("📋 כרטיסיות מוכנות להדפסה וגזירה (תצוגה מקדימה):")
+    # יצירת קובץ PDF אמיתי באמצעות FPDF עם מסגרות מקווקושות/נקיות לגזירה
+    pdf = FPDF(orientation='P', unit='mm', format='A4')
+    pdf.add_page()
     
-    # יצירת 4 כרטיסיות נפרדות בשחור-לבן לגזירה נוחה בדף
+    # הגדרת פונט בסיסי תואם אנגלית ותווים
+    pdf.set_font("Courier", size=10)
+    
+    # נחלק את העמוד לכרטיסיות (למשל 4 כרטיסיות בעמוד)
+    box_width = 180
+    box_height = 55
+    start_x = 15
+    start_y = 15
+    spacing = 8
+    
     for i in range(1, 5):
-        card_html = f"""
-        <div class="card-box">
-            <div class="card-header">✂️ כרטיסייה #{i} | {grade} ({programming_language})</div>
-            <pre style="margin:0; color: #000000; background: transparent; font-weight: bold;">{full_card_content}</pre>
-        </div>
-        """
-        st.markdown(card_html, unsafe_allow_html=True)
+        current_y = start_y + (i - 1) * (box_height + spacing)
         
-    st.markdown('</div>', unsafe_allow_html=True)
-    
+        # ציור מסגרת מלבנית לכרטיסייה (שחור-לבן נקי לגזירה)
+        pdf.set_draw_color(0, 0, 0)
+        pdf.set_line_width(0.5)
+        pdf.rect(start_x, current_y, box_width, box_height)
+        
+        # הוספת טקסט לתוך הכרטיסייה
+        pdf.set_xy(start_x + 4, current_y + 4)
+        header_text = f"✂️ Card #{i} | {grade} ({programming_language})"
+        pdf.set_font("Arial", 'B', 9)
+        pdf.cell(box_width - 8, 6, txt=header_text, ln=True)
+        
+        pdf.set_xy(start_x + 4, current_y + 12)
+        pdf.set_font("Courier", size=9)
+        
+        # פיצול השורות לצורך כתיבה מדויקת ב-PDF
+        for line in full_card_content.split('\n'):
+            pdf.set_x(start_x + 4)
+            pdf.cell(box_width - 8, 4.5, txt=line, ln=True)
+
+    # שמירת ה-PDF לקובץ זמני
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    pdf.output(tmp_file.name)
+    tmp_file.close()
+
+    # קריאת הקובץ להורדה ישירה דרך כפתור Streamlit אמיתי
+    with open(tmp_file.name, "rb") as pdf_file:
+        PDFbyte = pdf_file.read()
+
     st.markdown("---")
-    st.info("🖨️ **איך שומרים כ-PDF נקי לגזירה?** לחצי על מקשי **Ctrl + P** (או **Cmd + P** במק) במקלדת, בחרי באפשרות שמירה כ-PDF. העיצוב החדש יעלים את כפתורי המערכת וידפיס אך ורק את ריבועי הכרטיסיות בשחור-לבן!")
+    st.subheader("📥 הורדת קובץ ה-PDF המוכן:")
+    
+    # כפתור הורדת PDF רשמי שעובד בלחיצה אחת בלי שום טריקים של הדפדפן
+    st.download_button(
+        label="📄 לחץ כאן להורדת כרטיסיות ה-PDF לגזירה",
+        data=PDFbyte,
+        file_name="tech_greetings_cards.pdf",
+        mime="application/octet-stream"
+    )
+    
+    # ניקוי קבצים זמניים
+    if os.path.exists(tmp_file.name):
+        os.unlink(tmp_file.name)
