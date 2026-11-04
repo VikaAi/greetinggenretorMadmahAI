@@ -1,99 +1,143 @@
 import streamlit as st
 
-st.set_page_config(page_title="מחולל ברכות תכנותיות", page_icon="✂️", layout="centered")
+st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות", page_icon="✂️", layout="centered")
 
-# עיצוב CSS מותאם אישית כדי ליצור כרטיסיות נפרדות לגזירה ועיצוב נקי
+# עיצוב CSS מותאם אישית: שחור-לבן נקי, כרטיסיות מנוקדות לגזירה, והסתרת תפריטים בהדפסה ל-PDF
 st.markdown("""
     <style>
+    /* עיצוב כללי למסך */
+    body {
+        background-color: #f8f9fa;
+        color: #212529;
+    }
+    
+    /* סגנון כרטיסייה נפרדת לגזירה (שחור לבן נקי) */
     .card-box {
-        background-color: #161b22;
-        border: 2px dashed #58a6ff;
-        border-radius: 12px;
-        padding: 20px;
+        background-color: #ffffff;
+        border: 2px dashed #000000;
+        border-radius: 8px;
+        padding: 15px;
         margin-bottom: 20px;
         font-family: 'Courier New', Courier, monospace;
         direction: ltr;
         text-align: left;
-        color: #7ee787;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        color: #000000;
+        page-break-inside: avoid;
     }
+    
     .card-header {
-        color: #8b949e;
+        color: #555555;
         font-size: 0.85rem;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #30363d;
-        padding-bottom: 5px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #cccccc;
+        padding-bottom: 4px;
+        font-family: Arial, sans-serif;
+    }
+
+    /* הגדרות מיוחדות להדפסה ל-PDF: מציג אך ורק את הכרטיסיות בלי תפריטים ובאקראיות מיותרת */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printable-cards, #printable-cards * {
+            visibility: visible;
+        }
+        #printable-cards {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .stButton, .stTextInput, .stSelectbox, header, footer {
+            display: none !important;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("✂️ מחולל כרטיסיות ברכה תכנותיות לגזירה")
-st.write("מלאי את הפרמטרים וצרי כרטיסיות מעוצבות ומוכנות לגזירה לכיתה!")
+st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#)")
+st.write("מלאי את הפרמטרים, צרי כרטיסיות בשחור-לבן ושמרי מיד כקובץ PDF נקי לגזירה!")
 
-# אזור הקלט למורה (נשתמש ב-selectbox פשוט ובטוח)
+# שדות קלט למורה
 teacher_name = st.text_input("שם המורה:", value="נטע")
 grade = st.selectbox("כיתה / שכבה:", ["כיתה י'", "כיתה י'א", "כיתה י'ב", "מגמת סייבר"])
-topic = st.selectbox("שפת תכנות / נושא:", ["C#", "Python", "Java", "רקורסיה"])
+
+# שפת תכנות קבועה ל-C# בהתאם לבקשה
+programming_language = "C#"
+
+# נושאים מבוקשים
+topic = st.selectbox(
+    "נושא תכנותי:", 
+    ["תנאים (if/else)", "לולאות (Loops)", "קינון (Nested Loops)", "רקורסיה (Recursion)", "שרשרת חוליות (Linked List)"]
+)
+
 event = st.selectbox("אירוע:", ["מבחן / בגרות", "חג פסח", "חנוכה", "סיום שנה"])
 
-if st.button("✨ צור כרטיסיות לגזירה"):
+# אפשרות להתאמה אישית / שינוי קטגוריה חופשית
+custom_category = st.text_input("התאמה אישית לקטגוריה / הערה בכרטיסייה (אופציונלי):", value="")
+
+if st.button("✨ יצר כרטיסיות לגזירה"):
     
-    # יצירת ברכות מותאמות
-    if "מבחן" in event:
-        greeting_code = f"""try 
+    # בניית קוד הברכה בהתאם לנושא ולאירוע ב-C#
+    if "תנאים" in topic:
+        code_body = f"""if (learned && practiced) 
 {{
-    Console.WriteLine("התחלת פתרון מבחן ב-{topic}!");
-    Student.SolveWithConfidence();
+    Console.WriteLine("ההצלחה בדרך!");
 }}
-catch (Exception ex)
+else 
 {{
-    Console.WriteLine("שגיאה נתפסה: הלחץ מבוטל!");
-}}
-finally 
+    Console.WriteLine("תמשיך לנסות!");
+}}"""
+    elif "לולאות" in topic:
+        code_body = f"""for (int i = 0; i < exam.Questions; i++)
 {{
-    Console.WriteLine("עשיתם את המקסימום. בהצלחה!");
-}}
+    Console.WriteLine("פותר עוד שאלה בביטחון!");
+}}"""
+    elif "קינון" in topic:
+        code_body = f"""for (int r = 0; r < rows; r++)
+{{
+    for (int c = 0; c < cols; c++)
+        Console.Write("⭐ ");
+    Console.WriteLine();
+}}"""
+    elif "רקורסיה" in topic:
+        code_body = f"""public static void Solve(int level)
+{{
+    if (level == 0) return; // תנאי עצירה
+    Solve(level - 1);
+}}"""
+    else: // שרשרת חוליות
+        code_body = f"""Node current = head;
+while (current != null)
+{{
+    current = current.next;
+}}"""
 
-// {grade} | בהצלחה! מאמינה בכם ❤️
+    # הרכבת תוכן הכרטיסייה הסופי
+    category_label = f" | {custom_category}" if custom_category else ""
+    full_card_content = f"""// {grade} | {topic} | {event}{category_label}
+{code_body}
+
+// בהצלחה! מאמינה בכם ❤️
 // {teacher_name}"""
-    elif "פסח" in event:
-        greeting_code = f"""// ניקוי חמץ מערכתי ל-{grade}
-GC.Collect();
-DELETE FROM Brain WHERE ItemType = 'Stress';
-UPDATE Student SET Status = 'Chilling', Battery = 100;
 
-// חג פסח שמח ומלא מנוחה! 🍷
-// {teacher_name}"""
-    elif "חנוכה" in event:
-        greeting_code = f"""for (int c = 1; c <= 8; c++)
-{{
-    Console.WriteLine($"הדלקת נר #{{c}}: אור ואנרגיה ל{grade}!");
-}}
-Student.EnergyLevel += 500; // סופגניות
-
-// חג חנוכה מאיר ושמח! 🕎
-// {teacher_name}"""
-    else:
-        greeting_code = f"""public static void FinishYear()
-{{
-    Console.WriteLine("Exit Code 0: סיום מוצלח ל{grade} ב{topic}!");
-}}
-
-// כל הכבוד על הדרך! גאה בכם 🏆
-// {teacher_name}"""
-
-    st.success("הכרטיסיות נוצרו בהצלחה! ניתן לגזור אותן או להדפיס כ-PDF.")
+    st.success("הכרטיסיות נוצרו בהצלחה!")
     
-    st.subheader("📋 כרטיסיות מוכנות לגזירה (תצוגה מקדימה):")
+    # אזור ייעודי להדפסה בלבד (יוצג ב-PDF נקי בלי פילטרים)
+    st.markdown('<div id="printable-cards">', unsafe_allow_html=True)
+    st.subheader("📋 כרטיסיות מוכנות להדפסה וגזירה (תצוגה מקדימה):")
     
-    # יצירת הדמיה של 3 כרטיסיות נפרדות ועצמאיות לגזירה (ריבועים)
-    for i in range(1, 4):
+    # יצירת 4 כרטיסיות נפרדות בשחור-לבן לגזירה נוחה בדף
+    for i in range(1, 5):
         card_html = f"""
         <div class="card-box">
-            <div class="card-header">✂️ כרטיסייה #{i} | {grade} - {event}</div>
-            <pre style="margin:0; color: #7ee787; background: transparent;">{greeting_code}</pre>
+            <div class="card-header">✂️ כרטיסייה #{i} | {grade} ({programming_language})</div>
+            <pre style="margin:0; color: #000000; background: transparent; font-weight: bold;">{full_card_content}</pre>
         </div>
         """
         st.markdown(card_html, unsafe_allow_html=True)
         
-    st.info("💡 להדפסת הכרטיסיות כקובץ PDF נקי לגזירה: לחצי על Ctrl+P (או Cmd+P) במקלדת ושמרי את העמוד כ-PDF.")
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.info("🖨️ **איך שומרים כ-PDF נקי לגזירה?** לחצי על מקשי **Ctrl + P** (או **Cmd + P** במק) במקלדת, בחרי באפשרות שמירה כ-PDF. העיצוב החדש יעלים את כפתורי המערכת וידפיס אך ורק את ריבועי הכרטיסיות בשחור-לבן!")
