@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחולל ברכות תכנותיות למורים</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-accent: #58a6ff;
+            --btn-bg: #238636;
+            --btn-hover: #2ea043;
+            --code-bg: #010409;
+            --code-text: #7ee787;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            color: var(--text-accent);
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #8b949e;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--text-accent);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+        }
+
+        button.generate-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--btn-bg);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        button.generate-btn:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .result-header span {
+            font-size: 0.9rem;
+            color: #8b949e;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .copy-btn {
+            background-color: #21262d;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
+        }
+
+        .copy-btn:hover {
+            background-color: #30363d;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>מחולל ברכות תכנותיות למורים 🚀</h1>
+    <p class="subtitle">בחרו פרטים וקבלו מיד ברכה גיקית ומצחיקה לתלמידים</p>
+
+    <div class="form-group">
+        <label for="teacherName">שם המורה:</label>
+        <input type="text" id="teacherName" placeholder="לדוגמה: נטע" value="נטע">
+    </div>
+
+    <div class="form-group">
+        <label for="grade">כיתה / שכבה:</label>
+        <select id="grade">
+            <option value="כיתה י'">כיתה י'</option>
+            <option value="כיתה י''א">כיתה י'א</option>
+            <option value="כיתה י''ב">כיתה י'ב</option>
+            <option value="מגמת סייבר ותוכנה">מגמת סייבר ותוכנה</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="topic">נושא לימוד / שפה:</label>
+        <select id="topic">
+            <option value="C#">C#</option>
+            <option value="Python">Python</option>
+            <option value="Java">Java</option>
+            <option value="רקורסיה ואלגוריתמים">רקורסיה ואלגוריתמים</option>
+            <option value="מבני נתונים">מבני נתונים</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="event">אירוע:</label>
+        <select id="event">
+            <option value="מבחן / בגרות">מבחן / בגרות</option>
+            <option value="חג פסח (ניקוי חמץ)">חג פסח (ניקוי חמץ)</option>
+            <option value="חנוכה (הדלקת נרות)">חנוכה (הדלקת נרות)</option>
+            <option value="תחילת שנה / פרויקט חדש">תחילת שנה / פרויקט חדש</option>
+            <option value="סיום שנה / קורס">סיום שנה / קורס</option>
+        </select>
+    </div>
+
+    <button class="generate-btn" onclick="generateGreeting()">צור ברכה תכנותית ✨</button>
+
+    <div class="result-container" id="resultContainer">
+        <div class="result-header">
+            <span>הברכה שלך מוכנה להעתקה:</span>
+            <button class="copy-btn" onclick="copyToClipboard()">📋 העתק טקסט</button>
+        </div>
+        <pre id="greetingOutput"></pre>
+    </div>
+
+    <div class="footer-note">
+        מערכת פותחה עבור מורים ומורות שרוצים לחדש ולהצחיק את התלמידים ❤️
+    </div>
+</div>
+
+<script>
+    function generateGreeting() {
+        const teacher = document.getElementById('teacherName').value || 'המורה';
+        const grade = document.getElementById('grade').value;
+        const topic = document.getElementById('topic').value;
+        const eventType = document.getElementById('event').value;
+
+        let codeSnippet = '';
+
+        if (eventType.includes('מבחן')) {
+            codeSnippet = `// ברכה מיוחדת ל${grade} ב-${topic}
+try 
+{
+    Console.WriteLine("מתחילים פתרון מבחן...");
+    Student.SolveWithConfidence();
+    exam.Score = 100;
+}
+catch (StressException ex)
+{
+    Console.WriteLine("שגיאה נתפסה: הלחץ מבוטל לחלוטין!");
+}
+finally 
+{
+    Console.WriteLine("עשיתם את המקסימום. בהצלחה ענקית!");
+}
+
+// בהצלחה במבחן! 💯
+// באהבה, ${teacher}`;
+        } 
+        else if (eventType.includes('פסח')) {
+            codeSnippet = `// ניקוי מערכת לחג הפסח ל-${grade} (${topic})
+GC.Collect(); // ניקוי זיכרון ושאריות חמץ
+DELETE FROM Brain WHERE ItemType = 'Stress' OR ItemType = 'Homework';
+
+UPDATE Student 
+SET Status = 'Chilling', BatteryLevel = 100;
+
+Console.WriteLine("הזיכרון פונה בהצלחה. חג חופשי ושמח!");
+
+// חג שמח ומנוחה נעימה! 🍷
+// ממני, ${teacher}`;
+        }
+        else if (eventType.includes('חנוכה')) {
+            codeSnippet = `// לולאת הדלקת נרות ל${grade} - ${topic}
+for (int candle = 1; candle <= 8; candle++)
+{
+    Console.WriteLine($"הדלקת נר מספר {candle}: ✨ אור ואנרגיה!");
+}
+
+Student.EnergyLevel += 500; // תוספת סופגניות
+Console.WriteLine("האור שלכם מגרש את כל ה-Bugs!");
+
+// חג חנוכה שמח ומאיר! 🕎
+// באהבה, ${teacher}`;
+        }
+        else if (eventType.includes('תחילת שנה')) {
+            codeSnippet = `// אתחול שנה חדשה עבור ${grade}
+Student newStudent = new Student()
+{
+    Motivation = 100.0,
+    BugsInBrain = 0,
+    PreferredLanguage = "${topic}"
+};
+
+Console.WriteLine("המערכת אותחלה בהצלחה. יוצאים לדרך חדשה!");
+
+// שתהיה שנה מלאה בהישגים ופרויקטים מעולים! 🚀
+// ${teacher}`;
+        }
+        else {
+            codeSnippet = `// סיום קורס / פרויקט ב-${topic} עבור ${grade}
+public static void FinishModuleWithExcellence()
+{
+    Console.WriteLine("Compiling success...");
+    Console.WriteLine("Exit Code 0: תהליך הסתיים בגדול!");
+}
+
+// כל הכבוד על הדרך שעברתם! גאה בכם מאוד. 🏆
+// ${teacher}`;
+        }
+
+        document.getElementById('greetingOutput').textContent = codeSnippet;
+        document.getElementById('resultContainer').style.display = 'block';
+    }
+
+    function copyToClipboard() {
+        const text = document.getElementById('greetingOutput').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = '✔️ הועתק בהצלחה!';
+            setTimeout(() => {
+                btn.textContent = '📋 העתק טקסט';
+            }, 2000);
+        });
+    }
+</script>
+
+</body>
+</html>
