@@ -51,8 +51,8 @@ if st.session_state['page'] == 'create':
                     """
 
                     response = client.chat.completions.create(
-                        model="llama-3.1-8b-instant",
-                        messages=[{"role": "user", "content": prompt}],  # תיקון המרכאות כאן
+                        model="llama3-8b-8192",  # מודל יציב וזמין ב-Groq
+                        messages=[{"role": "user", "content": prompt}],
                         temperature=0.85
                     )
                     
