@@ -9,8 +9,8 @@ if 'page' not in st.session_state:
     st.session_state['page'] = 'create'
 
 if st.session_state['page'] == 'create':
-    st.title("⚡ מחולל ברכות תכנותיות מבוסס Groq AI (C#)")
-    st.write("צרי ברכה יצירתית, שנונה ומקורית בעזרת הבינה המלאכותית המהירה של Groq!")
+    st.title("⚡ מחולל ברכות תכנותיות  ")
+    st.write("צרו ברכה יצירתית, שנונה ומקורית בעזרת הבינה המלאכותית  !")
 
     teacher_name = st.text_input("שם המורה:", value="ויקה")
     grade_input = st.text_input("שם כיתה / שכבה חופשי:", value="כיתה י' האלופה")
