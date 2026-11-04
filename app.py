@@ -1,33 +1,30 @@
 import streamlit as st
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-import tempfile
-import os
 
 st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות", page_icon="✂️", layout="centered")
 
-st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#) ל-PDF")
-st.write("מלאי את הפרמטרים, צרי כרטיסיות שחור-לבן והורידי קובץ PDF מוכן לגזירה בלחיצת כפתור!")
+# ניהול מצב (Session State) כדי לעבור בין מסך היצירה למסך ההדפסה
+if 'page' not in st.session_state:
+    st.session_state['page'] = 'create'
 
-# שדות קלט גמישים לחלוטין (הקלדה חופשית מלאה)
-teacher_name = st.text_input("שם המורה:", value="ויקה")
+# --- מסך 1: יצירה ועריכה ---
+if st.session_state['page'] == 'create':
+    st.title("✂️ מחולל כרטיסיות ברכה תכנותיות (C#)")
+    st.write("צרי כרטיסייה אישית, בחני אותה, וכשתהיי מוכנה עברי לעמוד ההדפסה והגזירה!")
 
-# שדה כיתה המאפשר בחירה או הקלדה חופשית לגמרי
-grade_input = st.text_input("הקלד שם כיתה / שכבה (למשל: י' 3, מגמת סייבר):", value="כיתה י'")
+    # שדות קלט חופשיים לגמרי
+    teacher_name = st.text_input("שם המורה:", value="ויקה")
+    grade_input = st.text_input("שם כיתה / שכבה חופשי:", value="כיתה י'")
+    programming_language = "C#"
 
-programming_language = "C#"
+    topic = st.selectbox(
+        "נושא תכנותי:", 
+        ["תנאים (if/else)", "לולאות (Loops)", "קינון (Nested Loops)", "רקורסיה (Recursion)", "שרשרת חוליות (Linked List)"]
+    )
 
-topic = st.selectbox(
-    "נושא תכנותי:", 
-    ["תנאים (if/else)", "לולאות (Loops)", "קינון (Nested Loops)", "רקורסיה (Recursion)", "שרשרת חוליות (Linked List)"]
-)
+    event = st.selectbox("אירוע:", ["מבחן", "בגרות", "חג פסח", "חנוכה", "סיום שנה"])
+    custom_category = st.text_input("התאמה אישית לקטגוריה / הערה נוספת (אופציונלי):", value="")
 
-event = st.selectbox("אירוע:", ["מבחן", "בגרות", "חג פסח", "חנוכה", "סיום שנה"])
-custom_category = st.text_input("התאמה אישית לקטגוריה / הערה נוספת (אופציונלי):", value="")
-
-if st.button("✨ צור קובץ PDF לגזירה"):
-    
-    # בניית גוף הקוד בהתאם לנושא הנבחר ב-C#
+    # בניית גוף הקוד בהתאם לנושא
     if "תנאים" in topic:
         code_body = "if (learned && practiced)\n{\n    Console.WriteLine(\"ההצלחה בדרך!\");\n}\nelse\n{\n    Console.WriteLine(\"תמשיך לנסות!\");\n}"
     elif "לולאות" in topic:
@@ -40,68 +37,86 @@ if st.button("✨ צור קובץ PDF לגזירה"):
         code_body = "Node current = head;\nwhile (current != null)\n{\n    current = current.next;\n}"
 
     category_label = f" | {custom_category}" if custom_category else ""
-    card_title = f"// {grade_input} | {topic} | {event}{category_label}"
-    card_footer1 = "// בהצלחה! מאמינה בכם ❤️"
-    card_footer2 = f"// {teacher_name}"
-
-    # יצירת קובץ PDF אמיתי באמצעות ReportLab
-    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
-    pdf_path = tmp_file.name
-    tmp_file.close()
-
-    c = canvas.Canvas(pdf_path, pagesize=A4)
-    width, height = A4  # מידות דף A4 בנקודות
-
-    # הגדרת מידות לכרטיסיות (4 כרטיסיות בעמוד, מסגרת שחור-לבן מקווקושת/נקייה)
-    box_width = 500
-    box_height = 140
-    margin_x = (width - box_width) / 2
-    start_y = height - 160
-    spacing = 20
-
-    for i in range(1, 5):
-        current_y = start_y - (i - 1) * (box_height + spacing)
-        
-        # ציור מסגרת מלבנית בשחור-לבן לכל כרטיסייה
-        c.setLineWidth(1)
-        c.setDash(4, 4)  # קו מקווקו לגזירה
-        c.rect(margin_x, current_y, box_width, box_height)
-        c.setDash()      # איפוס הקו למלא עבור הטקסט
-        
-        # כתיבת תוכן הקוד בתוך הכרטיסייה (פונט מונוספייס)
-        c.setFont("Courier", 10)
-        text_x = margin_x + 15
-        text_y = current_y + box_height - 25
-        
-        # שורות ההדפסה בתוך הכרטיסייה
-        lines = [
-            f"✂️ כרטיסייה #{i} | {card_title}",
-            "--------------------------------------------------",
-            *code_body.split('\n'),
-            "",
-            card_footer1,
-            card_footer2
-        ]
-        
-        for line in lines:
-            c.drawString(text_x, text_y, line)
-            text_y -= 13  # מרווח שורות
-
-    c.save()
-
-    # קריאת קובץ ה-PDF שנוצר לצורך כפתור ההורדה
-    with open(pdf_path, "rb") as f:
-        pdf_bytes = f.read()
-
-    st.success("קובץ ה-PDF נוצר בהצלחה!")
     
-    # כפתור הורדה אמיתי ל-PDF
-    st.download_button(
-        label="📥 לחץ כאן להורדת קובץ ה-PDF לגזירה",
-        data=pdf_bytes,
-        file_name="tech_greetings_cards.pdf",
-        mime="application/pdf"
-    )
+    # שמירת הנתונים ב-Session State כדי שיועברו למסך הבא
+    st.session_state['card_data'] = {
+        'teacher': teacher_name,
+        'grade': grade_input,
+        'topic': topic,
+        'event': event,
+        'category': category_label,
+        'code': code_body,
+        'lang': programming_language
+    }
 
-    if os.path.exists(pdf_path):
-        os.unlink(pdf_path)
+    st.subheader("👀 תצוגה מקדימה של הברכה הבודדת:")
+    preview_box = f"""┌────────────────────────────────────────────────────────┐
+│ // {grade_input} | {topic} | {event}{category_label}
+{code_body}
+│
+│ // בהצלחה! מאמינה בכם ❤️
+│ // {teacher_name}
+└────────────────────────────────────────────────────────┘"""
+    st.code(preview_box, language="text")
+
+    if st.button("🖨️ מעבר לדף ההדפסה והגזירה (4 כרטיסיות בדף)"):
+        st.session_state['page'] = 'print'
+        st.rerun()
+
+# --- מסך 2: דף ההדפסה והגזירה הנקי ---
+elif st.session_state['page'] == 'print':
+    # עיצוב CSS מיוחד שמסתיר את התפריטים של האתר בזמן הדפסה
+    st.markdown("""
+        <style>
+        .card-box {
+            background-color: #ffffff;
+            border: 2px dashed #000000;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            font-family: 'Courier New', Courier, monospace;
+            direction: ltr;
+            text-align: left;
+            color: #000000;
+            page-break-inside: avoid;
+        }
+        .card-header {
+            color: #555555;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #cccccc;
+            padding-bottom: 4px;
+            font-family: Arial, sans-serif;
+        }
+        @media print {
+            .stButton, header, footer, .sidebar {
+                display: none !important;
+            }
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    if st.button("⬅️ חזרה לעריכה ויצירה"):
+        st.session_state['page'] = 'create'
+        st.rerun()
+
+    st.title("🖨️ עמוד הדפסה וגזירה")
+    st.info("💡 זהו עמוד ההדפסה הנקי. לחצי על Ctrl+P (או Cmd+P) במקלדת כדי לשמור כ-PDF או להדפיס את הכרטיסיות ישירות!")
+
+    data = st.session_state['card_data']
+    
+    full_card_content = f"""// {data['grade']} | {data['topic']} | {data['event']}{data['category']}
+{data['code']}
+
+// בהצלחה! מאמינה בכם ❤️
+// {data['teacher']}"""
+
+    # הצגת 4 כרטיסיות זהות מוכנות לגזירה בשחור-לבן
+    for i in range(1, 5):
+        card_html = f"""
+        <div class="card-box">
+            <div class="card-header">✂️ כרטיסייה #{i} | {data['grade']} ({data['lang']})</div>
+            <pre style="margin:0; color: #000000; background: transparent; font-weight: bold; font-size: 0.95rem;">{full_card_content}</pre>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
