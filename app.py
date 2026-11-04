@@ -1,20 +1,17 @@
 import streamlit as st
-import google.generativeai as genai
+from openai import OpenAI
 
-st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות מבוסס Gemini", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="מחולל כרטיסיות ברכה תכנותיות - Groq AI", page_icon="⚡", layout="centered")
 
-# הגדרת מפתח ה-API של Gemini מתוך ה-Secrets
-gemini_api_key = st.secrets.get("GEMINI_API_KEY", "")
-
-if gemini_api_key:
-    genai.configure(api_key=gemini_api_key)
+# שליפת מפתח ה-API של Groq מתוך ה-Secrets של Streamlit
+groq_api_key = st.secrets.get("GROQ_API_KEY", "")
 
 if 'page' not in st.session_state:
     st.session_state['page'] = 'create'
 
 if st.session_state['page'] == 'create':
-    st.title("🤖 מחולל ברכות תכנותיות מבוסס Gemini (C#)")
-    st.write("צרי ברכה יצירתית, שנונה ומקורית בעזרת הבינה המלאכותית של גוגל!")
+    st.title("⚡ מחולל ברכות תכנותיות מבוסס Groq AI (C#)")
+    st.write("צרי ברכה יצירתית, שנונה ומקורית בעזרת הבינה המלאכותית המהירה של Groq!")
 
     teacher_name = st.text_input("שם המורה:", value="ויקה")
     grade_input = st.text_input("שם כיתה / שכבה חופשי:", value="כיתה י' האלופה")
@@ -28,14 +25,17 @@ if st.session_state['page'] == 'create':
     event = st.selectbox("אירוע:", ["מבחן", "בגרות", "חג פסח", "חנוכה", "סיום שנה"])
     custom_category = st.text_input("התאמה אישית לקטגוריה / הערה נוספת (אופציונלי):", value="")
 
-    if st.button("✨ ג'נרט ברכה יצירתית עם Gemini"):
-        if not gemini_api_key:
-            st.error("נא להגדיר את מפתח ה-GEMINI_API_KEY בהגדרות ה-Secrets של Streamlit.")
+    if st.button("✨ ג'נרט ברכה יצירתית עם Groq"):
+        if not groq_api_key:
+            st.error("נא להגדיר את מפתח ה-GROQ_API_KEY בהגדרות ה-Secrets של Streamlit.")
         else:
-            with st.spinner("Gemini חושב על קוד יצירתי במיוחד בשבילך... 🚀"):
+            with st.spinner("Groq מייצר עבורך קוד יצירתי במהירות הבזק... 🚀"):
                 try:
-                    # עדכון שם המודל לגרסה יציבה
-                    model = genai.GenerativeModel('gemini-1.5-pro')
+                    # חיבור ל-Groq תוך שימוש במבנה של OpenAI
+                    client = OpenAI(
+                        base_url="https://api.groq.com/openai/v1",
+                        api_key=groq_api_key
+                    )
                     
                     prompt = f"""
                     כתוב קוד ברכה קצר, חכם ומצחיק לתלמידים בתחביר של שפת C#.
@@ -52,8 +52,13 @@ if st.session_state['page'] == 'create':
                     3. אל תוסיף הסברים מסביב, רק את קוד ה-C# עצמו שמתחיל בהערה עם פרטי הברכה ומסתיים בחתימת המורה.
                     """
 
-                    response = model.generate_content(prompt)
-                    ai_code = response.text.strip()
+                    response = client.chat.completions.create(
+                        model="llama-3.1-8b-instant",  # מודל מהיר ויציב במיוחד של Groq
+                        messages=[{"role": "user", content: prompt}],
+                        temperature=0.85
+                    )
+                    
+                    ai_code = response.choices[0].message.content.strip()
                     ai_code = ai_code.replace("```csharp", "").replace("```", "").strip()
                     
                     st.session_state['card_data'] = {
@@ -64,9 +69,9 @@ if st.session_state['page'] == 'create':
                         'code': ai_code,
                         'lang': programming_language
                     }
-                    st.success("הברכה נוצרה בהצלחה על ידי Gemini! 🎉")
+                    st.success("הברכה נוצרה בהצלחה! 🎉")
                 except Exception as e:
-                    st.error(f"שגיאה בהתחברות ל-Gemini API: {e}")
+                    st.error(f"שגיאה בהתחברות ל-Groq API: {e}")
 
     if 'card_data' in st.session_state:
         st.subheader("👀 תצוגה מקדימה של הברכה:")
