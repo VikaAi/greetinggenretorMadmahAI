@@ -49,7 +49,7 @@ if st.session_state['page'] == 'create':
                     2. שלב בתוך הקוד (כהערה או כטקסט פנימי) פאנץ' שנון או בדיחה קטנה שקשורה ל-{event} ול-{topic}.
                     3. אל תמציא לולאות ארוכות או לוגיקה מסובכת שלא קשורה.
                     4. פלט אך ורק את קוד ה-C# הנקי, בלי שום מילות הסבר מסביב, ומדגם כך שיסתיים בחתימה של {teacher_name}.
-                    5. השתמש בירידות שורה ובמבנה נקי ומסודר של קוד (עם בלוקים וסוגריים מסולסלים כמקובל ב-C#).
+                    5. השתמש בירידות שורה ובמבנה נקי ומסודר של קוד (עם בלוקים וסוגריים מסולסלים כמקובל ב-C#).להוריד קוד מעטף מיותר רק את הקטע קוד הרלוונטי עם הזחות.
                     """
 
                     response = client.chat.completions.create(
@@ -102,6 +102,7 @@ elif st.session_state['page'] == 'print':
             text-align: left;
             color: #000000;
             page-break-inside: avoid;
+            white-space: pre-wrap;  /* שומר על ירידות השורה בדיוק כמו שערכת! */
         }
         .card-header {
             color: #555555;
@@ -124,10 +125,12 @@ elif st.session_state['page'] == 'print':
                 padding: 6px !important;
                 margin-bottom: 8px !important;
                 font-size: 0.8rem !important;
+                white-space: pre-wrap !important; /* שומר על ירידות השורה גם בזמן הדפסה בפועל */
             }
             pre {
                 font-size: 0.8rem !important;
                 line-height: 1.15 !important;
+                white-space: pre-wrap !important;
             }
         }
         </style>
