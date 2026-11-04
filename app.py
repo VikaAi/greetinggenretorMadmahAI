@@ -15,12 +15,12 @@ if st.session_state['page'] == 'create':
     teacher_name = st.text_input("שם המורה:", value="ויקה")
     grade_input = st.text_input("שם כיתה / שכבה חופשי:", value="כיתה י'")
     programming_language = "C#"
-
+    
     topic = st.selectbox(
         "נושא תכנותי:", 
         ["תנאים (if/else)", "לולאות (Loops)", "קינון (Nested Loops)", "רקורסיה (Recursion)", "שרשרת חוליות (Linked List)"]
     )
-
+    
     event = st.selectbox("אירוע:", ["מבחן", "בגרות", "חג פסח", "חנוכה", "סיום שנה"])
     custom_category = st.text_input("התאמה אישית לקטגוריה / הערה נוספת (אופציונלי):", value="")
 
@@ -66,7 +66,7 @@ if st.session_state['page'] == 'create':
 # --- מסך 2: דף ההדפסה והגזירה הנקי ---
 elif st.session_state['page'] == 'print':
     # עיצוב CSS מיוחד שמסתיר את התפריטים של האתר בזמן הדפסה
-st.markdown("""
+    st.markdown("""
         <style>
         .card-box {
             background-color: #ffffff;
@@ -88,28 +88,20 @@ st.markdown("""
             padding-bottom: 3px;
             font-family: Arial, sans-serif;
         }
-        
-        /* הגדרות מיוחדות ומדויקות להדפסה בלבד */
         @media print {
-            /* הסתרת כל מה שלא קשור לכרטיסיות */
             .stButton, header, footer, .sidebar, title, .stInfo {
                 display: none !important;
             }
-            
-            /* העלאת הדף למעלה וביטול שוליים מיותרים של הדפדפן */
             body {
                 margin: 0 !important;
                 padding: 0 !important;
             }
-            
-            /* התאמת גודל הכרטיסיות כדי שיתיישבו מושלם בעמוד הדפסה אחד או שניים בלי לחרוג */
             .card-box {
                 border: 1.5px dashed #000000 !important;
                 padding: 8px !important;
                 margin-bottom: 10px !important;
                 font-size: 0.85rem !important;
             }
-            
             pre {
                 font-size: 0.85rem !important;
                 line-height: 1.2 !important;
